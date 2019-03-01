@@ -127,7 +127,7 @@ Known Limitations
 
 Report bugs if you find some! Whether it is an explicit error or something that looks suspicious in the renders.
 
-TODO: add overlap fusion mode, in particular 'Lighten'
+Add different overlap fusion modes. When merging overlapping faces, simple average is used (with variable weights to smooth out the transition). But for some effects, other fusion mode could be useful. In particular, for bloom effect, a more appropriate fusion mode would be a max ("lighten" fusion mode).
 
 This is more a technical concern than an issue, and does not affect the users, but I would have liked to use 3D render textures instead of lists textures for the faces, but I could not get it to work in Unity. If anybody passes by and have experience with those, help wanted!
 
