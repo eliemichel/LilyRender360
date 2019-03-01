@@ -29,6 +29,13 @@ Furthermore, as with rectangular rendering, one has to ensure that the `Time.del
  - Smooth stitch lines. Lily Render 360 provides several tools to minimize stitching artifacts. It can render an extra margin around each face of the cubemap and then smoothly merge the overlap region. Or it can render two cubemaps with different orientations and merge them.
  - Render in sRGB (Gamma) or HDR Linear color spaces.
 
+Support
+-------
+
+Support is available through the [github issues](https://github.com/eliemichel/LilyRender360/issues) of this repository, as well as on the [support thread](https://forum.unity.com/threads/lily-render-360-stitch-free-equirectangular-rendering.637171/) on Unity forum.
+
+I am available for development of **on-demand features**. Depending on the nature of the project for which you need it, I may or may not do it for free.
+
 Example
 -------
 
@@ -130,11 +137,6 @@ Report bugs if you find some! Whether it is an explicit error or something that 
 Add different overlap fusion modes. When merging overlapping faces, simple average is used (with variable weights to smooth out the transition). But for some effects, other fusion mode could be useful. In particular, for bloom effect, a more appropriate fusion mode would be a max ("lighten" fusion mode).
 
 This is more a technical concern than an issue, and does not affect the users, but I would have liked to use 3D render textures instead of lists textures for the faces, but I could not get it to work in Unity. If anybody passes by and have experience with those, help wanted!
-
-On-Demand Features
-------------------
-
-I am available for tailored feature development, just open an issue or leave me an email at elie.michel at exppad.com with "Lily Render 360" somewhere in the object. Depending on the nature of the project for which you need it, I may or may not do it for free.
 
 License
 -------
