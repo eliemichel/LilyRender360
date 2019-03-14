@@ -52,6 +52,23 @@ public class LilyGUI
         EditorGUILayout.EndHorizontal();
     }
 
+    public static void BeginPanel(string label)
+    {
+        GUIStyle headerStyle = new GUIStyle();
+        headerStyle.fontStyle = FontStyle.Bold;
+        GUILayout.Label(label, headerStyle);
+        BeginIndent(10);
+    }
+
+    public static void EndPanel(bool spaceAfter = true)
+    {
+        EndIndent();
+        if (spaceAfter)
+        {
+            EditorGUILayout.Space();
+        }
+    }
+
     public static void BeginIndent(int space)
     {
         GUILayout.BeginHorizontal();

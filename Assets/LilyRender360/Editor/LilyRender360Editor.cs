@@ -51,6 +51,10 @@ public class LilyRender360Editor : Editor
         "Width",
         "Width of the output frames. The height will always be half of it."
     );
+    GUIContent heightLabel = new GUIContent(
+        "Height",
+        "Height of the output frames. If disabled, the height is auto-computed from the width and FoV parameters."
+    );
     GUIContent framerateLabel = new GUIContent(
         "Framerate",
         "Number of frames per second in the target render. If the game cannot run at this frame rate, it will be slowed down, so that no frame is dropped."
@@ -59,9 +63,21 @@ public class LilyRender360Editor : Editor
         "Overwrite Existing Files",
         "If the output file already exists, overwrite it or not. If not, the frame is not rendered and a warning is logged in the console."
     );
-    GUIContent quitFrameLabel = new GUIContent(
-        "Quit After Frame",
-        "Stop the game once this number of frames has been rendered."
+    GUIContent startFrameLabel = new GUIContent(
+        "Start Frame",
+        "Start rendering from this frame on."
+    );
+    GUIContent endFrameLabel = new GUIContent(
+        "End Frame",
+        "Stop the game once this frame has been rendered."
+    );
+    GUIContent horizontalFovLabel = new GUIContent(
+        "Horizontal Field of View",
+        "Range of angles covered by the render on the horizontal axis."
+    );
+    GUIContent verticalFovLabel = new GUIContent(
+        "Vertical Field of View",
+        "Range of angles covered by the render on the vertical axis."
     );
     GUIContent overlapLabel = new GUIContent(
         "Overlap",
@@ -106,11 +122,22 @@ public class LilyRender360Editor : Editor
         if (i > -1) cont.width = presetValues[i];
         EditorGUILayout.EndHorizontal();
 
-        cont.targetFramerate = EditorGUILayout.IntField(framerateLabel, cont.targetFramerate);
-
+        LilyGUI.OptionalIntField(heightLabel, ref cont.enableHeight, ref cont.height);
+        
         cont.overwriteFile = GUILayout.Toggle(cont.overwriteFile, overwriteLabel);
+    }
 
-        LilyGUI.OptionalIntField(quitFrameLabel, ref cont.enableQuitAfterFrame, ref cont.quitAfterFrame);
+    void TimePanel()
+    {
+        cont.targetFramerate = EditorGUILayout.IntField(framerateLabel, cont.targetFramerate);
+        cont.startFrame = EditorGUILayout.IntField(startFrameLabel, cont.startFrame);
+        LilyGUI.OptionalIntField(endFrameLabel, ref cont.enableEndFrame, ref cont.endFrame);
+    }
+
+    void ProjectionPanel()
+    {
+        cont.horizontalFov = EditorGUILayout.Slider(horizontalFovLabel, cont.horizontalFov, 0, 360);
+        cont.verticalFov = EditorGUILayout.Slider(verticalFovLabel, cont.verticalFov, 0, 180);
     }
 
     void StitchingPanel()
@@ -137,7 +164,7 @@ public class LilyRender360Editor : Editor
         string msg = "";
         msg += "Output file: " + cont.AbsoluteFramePath(0) + "\n";
         msg += "Number of renders: " + (cont.doubleRender ? 12 : 6).ToString() + " x " + cont.cubeFaceSize.ToString() + "px\n";
-        msg += "Quit after frame: " + cont.MaxFrame;
+        msg += "Render from frame " + cont.startFrame + " to frame " + cont.MaxFrame;
         EditorGUILayout.HelpBox(msg, MessageType.Info);
     }
 
@@ -145,23 +172,23 @@ public class LilyRender360Editor : Editor
     {
         cont = (LilyRender360)target;
         cont.ChechParameters();
-
-        GUIStyle headerStyle = new GUIStyle();
-        headerStyle.fontStyle = FontStyle.Bold;
-
-        GUILayout.Label("Output", headerStyle);
-        LilyGUI.BeginIndent(10);
-        OutputPanel();
-        LilyGUI.EndIndent();
-
-        EditorGUILayout.Space();
         
-        GUILayout.Label("Stitching", headerStyle);
-        LilyGUI.BeginIndent(10);
-        StitchingPanel();
-        LilyGUI.EndIndent();
+        LilyGUI.BeginPanel("Output");
+        OutputPanel();
+        LilyGUI.EndPanel();
 
-        EditorGUILayout.Space();
+        LilyGUI.BeginPanel("Time");
+        TimePanel();
+        LilyGUI.EndPanel();
+
+        LilyGUI.BeginPanel("Projection");
+        ProjectionPanel();
+        LilyGUI.EndPanel();
+
+        LilyGUI.BeginPanel("Stitching");
+        StitchingPanel();
+        LilyGUI.EndPanel();
+        
         InfoPanel();
     }
 }

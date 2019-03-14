@@ -57,10 +57,12 @@ fixed4 equirectangularSmooth(
 	float3x3 orientMatrix,
 #endif
 	float beta,
+	float hfov,
+	float vfov,
 	out float2 px)
 {
-	float theta = (1 + 2 * i.uv.x) * PI;
-	float phi = (1 - 2 * i.uv.y) * PI / 2;
+	float theta = (i.uv.x - 0.5) * hfov;
+	float phi = -(i.uv.y - 0.5) * vfov;
 
 	float x = cos(phi) * sin(theta);
 	float y = sin(phi);
@@ -153,10 +155,12 @@ fixed4 equirectangular(
 	float3x3 orientMatrix,
 #endif
 	float beta,
+	float hfov,
+	float vfov,
 	out float2 px)
 {
-	float theta = (1 + 2 * i.uv.x) * PI;
-	float phi = (1 - 2 * i.uv.y) * PI / 2;
+	float theta = (1 + 2 * i.uv.x) / 2 * hfov;
+	float phi = (1 - 2 * i.uv.y) / 2 * vfov;
 
 	float x = cos(phi) * sin(theta);
 	float y = sin(phi);

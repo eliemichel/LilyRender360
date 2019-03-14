@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -772,10 +772,10 @@ GameObject:
   - component: {fileID: 1562765411}
   - component: {fileID: 1562765410}
   - component: {fileID: 1562765409}
-  - component: {fileID: 1562765412}
   - component: {fileID: 1562765415}
   - component: {fileID: 1562765414}
   - component: {fileID: 1562765413}
+  - component: {fileID: 1562765412}
   m_Layer: 8
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -860,21 +860,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1143dc84ee44be1468983cf0f3f3ea26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 4096
-  overlap: 0.1
-  enableQuitAfterFrame: 0
-  quitAfterFrame: -1
   targetFramerate: 30
   format: 0
   prefix: Recordings/
-  overrideFile: 1
-  stitchingOrientation: {fileID: 0}
-  showStitchLines: 1
-  doubleRender: 0
-  smoothStitching: 1
-  enableCubeFaceSize: 0
-  cubeFaceSize: 1228
   nDigits: 4
+  overwriteFile: 0
+  width: 1024
+  enableHeight: 0
+  height: 512
+  startFrame: 0
+  enableEndFrame: 0
+  endFrame: -1
+  horizontalFov: 360
+  verticalFov: 180
+  overlap: 0.5
+  stitchingOrientation: {fileID: 0}
+  showStitchLines: 0
+  enableCubeFaceSize: 0
+  cubeFaceSize: 512
+  doubleRender: 0
+  smoothStitching: 0
 --- !u!114 &1562765413
 MonoBehaviour:
   m_ObjectHideFlags: 0

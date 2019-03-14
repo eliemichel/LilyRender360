@@ -28,6 +28,10 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
+/**
+ * TODO: When using limited fov, detect which cubemap faces are not useful.
+ * It is a bit tricky because of the stitching transform object.
+ */
 public class LilyRender360 : MonoBehaviour
 {
     #region [Public Enumerations]
@@ -42,26 +46,34 @@ public class LilyRender360 : MonoBehaviour
 
     #region [Public Parameters]
 
-    public int width = 1024;
-    public float overlap = 0.5f;
-
-    public bool enableQuitAfterFrame = false;
-    public int quitAfterFrame = -1;
-
+    // Output options
     public int targetFramerate = 30;
     public Format format;
     public string prefix = "Recordings/";
+    public int nDigits = 4;
     public bool overwriteFile = false;
 
+    public int width = 1024;
+    public bool enableHeight = false;
+    public int height = 1024;
+    public int startFrame = 0;
+    public bool enableEndFrame = false;
+    public int endFrame = -1;
+
+    // Projection options
+    public float horizontalFov = 360;
+    public float verticalFov = 180;
+
+    // Stitching options
+    public float overlap = 0.5f;
     public Transform stitchingOrientation; // can be null
     public bool showStitchLines; // only taken into account at start
-    public bool doubleRender; // twice as heavy, only taken into account at start
-    public bool smoothStitching; // requires a non null margin, only taken into account at start
 
+    // Advanced options
     public bool enableCubeFaceSize = false; // Use custom face size (otherwise auto-computed)
     public int cubeFaceSize = 512; // Cube face size used if enableCubeFaceSize is enabled
-
-    public int nDigits = 4;
+    public bool doubleRender; // twice as heavy, only taken into account at start
+    public bool smoothStitching; // requires a non null margin, only taken into account at start
 
     #endregion
 
@@ -94,22 +106,36 @@ public class LilyRender360 : MonoBehaviour
     }}
 
     public int MaxFrame { get {
-        return (int)Mathf.Min(quitAfterFrame > -1 ? quitAfterFrame : Mathf.Infinity, Mathf.Pow(10, nDigits) - 1);
+        return (int)Mathf.Min(endFrame > -1 ? endFrame : Mathf.Infinity, Mathf.Pow(10, nDigits) - 1);
     }}
 
     public string AbsoluteFramePath(int frame) {
         return string.Format("{0}{1:D" + nDigits.ToString() + "}.{2}", AbsolutePrefix, frame, format == Format.EXR ? "exr" : "png");
     }
 
+    // width equivalent if the output were 360 deg wide
+    public float FullWidth { get {
+        float w = width * 360 / horizontalFov;
+        return Mathf.Min(w, 8 * width); // security
+    } }
+
+    public float SuggestedHeight { get {
+            float fullHeight = FullWidth / 2;
+            return fullHeight * verticalFov / 180;
+    } }
+
     // Called at start, update, and also from the custom inspector
     public void ChechParameters()
     {
-        if (!enableCubeFaceSize)
+        if (!enableHeight)
         {
-            cubeFaceSize = (int)(width / 4 * (1 + overlap * 2));
+            height = (int)SuggestedHeight;
         }
 
-        width += width % 2; // make it even
+        if (!enableCubeFaceSize)
+        {
+            cubeFaceSize = (int)(FullWidth / 4 * (1 + overlap * 2));
+        }
     }
 
     #endregion
@@ -125,7 +151,7 @@ public class LilyRender360 : MonoBehaviour
             _faces[i] = new RenderTexture(cubeFaceSize, cubeFaceSize, 24, format == Format.PNG ? RenderTextureFormat.ARGB32 : RenderTextureFormat.ARGBFloat);
         }
 
-        _equirect = new RenderTexture(width, width / 2, 24, format == Format.PNG ? RenderTextureFormat.ARGB32 : RenderTextureFormat.ARGBFloat);
+        _equirect = new RenderTexture(width, height, 24, format == Format.PNG ? RenderTextureFormat.ARGB32 : RenderTextureFormat.ARGBFloat);
     }
 
     RenderTexture Face(CubeFace face, int cube = 0)
@@ -190,8 +216,13 @@ public class LilyRender360 : MonoBehaviour
 
     void ConvertToEquirect()
     {
-        Matrix4x4 orientMatrix = stitchingOrientation != null ? Matrix4x4.Rotate(stitchingOrientation.rotation) : Matrix4x4.identity;
-
+        Vector3 euler = stitchingOrientation.eulerAngles;
+        Quaternion q = Quaternion.identity;
+        q *= Quaternion.AngleAxis(euler.z, Vector3.forward);
+        q *= Quaternion.AngleAxis(euler.x, Vector3.right);
+        q *= Quaternion.AngleAxis(-euler.y, Vector3.up);
+        Matrix4x4 orientMatrix = stitchingOrientation != null ? Matrix4x4.Rotate(q): Matrix4x4.identity;
+        
         _equirectMat.SetTexture("_FaceTexPX", Face(CubeFace.PX, 0));
         _equirectMat.SetTexture("_FaceTexNX", Face(CubeFace.NX, 0));
         _equirectMat.SetTexture("_FaceTexPY", Face(CubeFace.PY, 0));
@@ -202,6 +233,9 @@ public class LilyRender360 : MonoBehaviour
         _equirectMat.SetMatrix("_OrientMatrix", orientMatrix);
 
         _equirectMat.SetFloat("_Beta", 1 / (1 + overlap));
+
+        _equirectMat.SetFloat("_HorizontalFov", horizontalFov * Mathf.Deg2Rad);
+        _equirectMat.SetFloat("_VerticalFov", verticalFov * Mathf.Deg2Rad);
 
         if (doubleRender)
         {
@@ -232,7 +266,7 @@ public class LilyRender360 : MonoBehaviour
         Time.maximumDeltaTime = (1.0f / targetFramerate);
         Time.captureFramerate = targetFramerate;
         
-        _equirectMat = new Material(Shader.Find("Hidden/Equirectangular"));
+        _equirectMat = new Material(Shader.Find("Hidden/LilyRender/Equirectangular"));
         _equirectMat.EnableKeyword("ORIENT_CUBE");
         if (showStitchLines)
         {
@@ -254,30 +288,33 @@ public class LilyRender360 : MonoBehaviour
     {
         ChechParameters();
 
-        string filename = AbsoluteFramePath(_frame);
-        if (File.Exists(filename) && !overwriteFile)
+        if (_frame >= startFrame)
         {
-            Debug.LogWarning("File '" + filename + "' already exists. Skipping frame (check 'Override' to force overriding existing files).");
-        }
-        else
-        {
-            RenderCubemap(0);
-            if (doubleRender)
+            string filename = AbsoluteFramePath(_frame);
+            if (File.Exists(filename) && !overwriteFile)
             {
-                RenderCubemap(1);
+                Debug.LogWarning("File '" + filename + "' already exists. Skipping frame (check 'Override' to force overriding existing files).");
             }
-            ConvertToEquirect();
+            else
+            {
+                RenderCubemap(0);
+                if (doubleRender)
+                {
+                    RenderCubemap(1);
+                }
+                ConvertToEquirect();
 
-            RenderTexture.active = _equirect;
-            _tex.ReadPixels(new Rect(0, 0, _equirect.width, _equirect.height), 0, 0);
-            byte[] data = format == Format.EXR ? _tex.EncodeToEXR(Texture2D.EXRFlags.CompressZIP) : _tex.EncodeToPNG();
-            RenderTexture.active = null;
-            File.WriteAllBytes(filename, data);
+                RenderTexture.active = _equirect;
+                _tex.ReadPixels(new Rect(0, 0, _equirect.width, _equirect.height), 0, 0);
+                byte[] data = format == Format.EXR ? _tex.EncodeToEXR(Texture2D.EXRFlags.CompressZIP) : _tex.EncodeToPNG();
+                RenderTexture.active = null;
+                File.WriteAllBytes(filename, data);
+            }
         }
 
         _frame++;
 
-        if (_frame > MaxFrame || (enableQuitAfterFrame && quitAfterFrame >= 0 && _frame > quitAfterFrame))
+        if (_frame > MaxFrame || (enableEndFrame && endFrame >= 0 && _frame > endFrame))
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;

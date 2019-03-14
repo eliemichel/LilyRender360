@@ -23,7 +23,7 @@
  * rendering, available at https://github.com/eliemichel/LilyRender360
  */
 
-Shader "Hidden/Equirectangular"
+Shader "Hidden/LilyRender/Equirectangular"
 {
 	Properties
 	{
@@ -69,6 +69,8 @@ Shader "Hidden/Equirectangular"
 			};
 
 			float _Beta;
+			float _HorizontalFov;
+			float _VerticalFov;
 
 			sampler2D _FaceTexPX;
 			sampler2D _FaceTexNX;
@@ -117,7 +119,7 @@ Shader "Hidden/Equirectangular"
 #ifdef ORIENT_CUBE
 						(float3x3)_OrientMatrix,
 #endif
-						_Beta, px);
+						_Beta, _HorizontalFov, _VerticalFov, px);
 
 #ifdef TWO_CUBES
 				fixed4 c2 =
@@ -130,7 +132,7 @@ Shader "Hidden/Equirectangular"
 #  ifdef ORIENT_CUBE
 					(float3x3)_OrientMatrix2,
 #  endif
-					_Beta, px2);
+					_Beta, _HorizontalFov, _VerticalFov, px2);
 				float q = max(smoothstep(0.25, 0.45, abs(px.x - 0.5)), smoothstep(0.25, 0.45, abs(px.y - 0.5)));
 				//float q2 = max(smoothstep(0.25, 0.45, abs(px2.x - 0.5)), smoothstep(0.25, 0.45, abs(px2.y - 0.5)));
 				return lerp(c, c2, q);

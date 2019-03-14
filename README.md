@@ -1,7 +1,7 @@
 Lily Render 360
 ===============
 
-Lily Render 360 is a tool for rendering a Unity scene into equirectangular images. It has been written with precomputed rendering in mind, so it focuses on image quality rather than rendering speed. Nevertheless, efforts have been made to make it efficient where it did not mean sacrificing quality.
+Lily Render 360 is a tool for rendering a Unity scene into [equirectangular](https://en.wikipedia.org/wiki/Equirectangular_projection) images (also known as *geographic projection*). It has been written with precomputed rendering in mind, so it focuses on image quality rather than rendering speed. Nevertheless, efforts have been made to make it efficient where it did not mean sacrificing quality.
 
 ![Before/After Lily Render 360](doc/before-after.png)
 
@@ -86,16 +86,28 @@ Number of digits in the output file name. This limits the maximum number of fram
 File format used for output. PNG files are 8 bit sRGB. EXR are 32 bit Linear.
 
 **Width**  
-Width of the output frames. The height will always be half of it.
+Width of the output frames.
 
-**Framerate**  
-Number of frames per second in the target render. If the game cannot run at this frame rate, it will be slowed down, so that no frame is dropped.
+**Height**  
+Height of the output frames. If disabled, a suggested height is auto-computed from the width and field of view parameters. It is recommanded to keep it disabled and tune the *Vertical Field of View* instead.
 
 **Overwrite Existing Files**  
 If the output file already exists, overwrite it or not. If not, the frame is not rendered and a warning is logged in the console.
 
-**Quit After Frame**  
-Stop the game once this number of frames has been rendered.
+**Framerate**  
+Number of frames per second in the target render. If the game cannot run at this frame rate, it will be slowed down, so that no frame is dropped.
+
+**Start Frame**  
+Start rendering from this frame on. Frame numbers start at zero.
+
+**End Frame**  
+Stop the game once this frame has been rendered.
+
+**Horizontal Field of View**  
+Range of angles covered by the render on the horizontal axis. Use 360° for a full render, 180° for a half sphere, and so on.
+
+**Vertical Field of View**  
+Range of angles covered by the render on the vertical axis. Use 180° for a full spherical render, and around 90° to get more of a cylindrical effect.
 
 **Overlap**  
 Increase this to smooth the stitching. Render faces with a wider FoV, so that they overlap, to account for non local post-effects. This is expressed in percentage of the face size.
