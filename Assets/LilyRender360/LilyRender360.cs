@@ -72,8 +72,8 @@ public class LilyRender360 : MonoBehaviour
     // Advanced options
     public bool enableCubeFaceSize = false; // Use custom face size (otherwise auto-computed)
     public int cubeFaceSize = 512; // Cube face size used if enableCubeFaceSize is enabled
-    public bool doubleRender; // twice as heavy, only taken into account at start
-    public bool smoothStitching; // requires a non null margin, only taken into account at start
+    public bool doubleRender = false; // twice as heavy, only taken into account at start
+    public bool smoothStitching = true; // requires a non null margin, only taken into account at start
 
     #endregion
 
@@ -106,7 +106,7 @@ public class LilyRender360 : MonoBehaviour
     }}
 
     public int MaxFrame { get {
-        return (int)Mathf.Min(endFrame > -1 ? endFrame : Mathf.Infinity, Mathf.Pow(10, nDigits) - 1);
+        return (int)Mathf.Min(enableEndFrame && endFrame > -1 ? endFrame : Mathf.Infinity, Mathf.Pow(10, nDigits) - 1);
     }}
 
     public string AbsoluteFramePath(int frame) {
@@ -165,7 +165,7 @@ public class LilyRender360 : MonoBehaviour
         float currentFov = _cam.fieldOfView;
         Quaternion cameraOrientation = _cam.transform.rotation;
         RenderTexture currentTex = _cam.targetTexture;
-
+        
         if (stitchingOrientation != null)
         {
             _cam.transform.rotation = stitchingOrientation.rotation;
@@ -175,14 +175,14 @@ public class LilyRender360 : MonoBehaviour
         {
             _cam.transform.Rotate(-45, 45, 0);
         }
-
+        
         _cam.fieldOfView = 2 * Mathf.Atan(1 + overlap) / Mathf.PI * 180;
         
         // Render front (+X)
         _cam.targetTexture = Face(CubeFace.PX, cube);
         _cam.transform.Rotate(0, 90, 0);
         _cam.Render();
-
+        
         // Render right (-Z)
         _cam.targetTexture = Face(CubeFace.NZ, cube);
         _cam.transform.Rotate(0, 90, 0);
@@ -207,7 +207,7 @@ public class LilyRender360 : MonoBehaviour
         _cam.targetTexture = Face(CubeFace.NY, cube);
         _cam.transform.Rotate(180, 0, 0);
         _cam.Render();
-        
+
         // Restore camera settings
         _cam.fieldOfView = currentFov;
         _cam.transform.rotation = cameraOrientation;
@@ -216,12 +216,17 @@ public class LilyRender360 : MonoBehaviour
 
     void ConvertToEquirect()
     {
-        Vector3 euler = stitchingOrientation.eulerAngles;
-        Quaternion q = Quaternion.identity;
-        q *= Quaternion.AngleAxis(euler.z, Vector3.forward);
-        q *= Quaternion.AngleAxis(euler.x, Vector3.right);
-        q *= Quaternion.AngleAxis(-euler.y, Vector3.up);
-        Matrix4x4 orientMatrix = stitchingOrientation != null ? Matrix4x4.Rotate(q): Matrix4x4.identity;
+        Matrix4x4 orientMatrix = Matrix4x4.identity;
+        if (stitchingOrientation != null)
+        {
+            Matrix4x4 tr = _cam.transform.worldToLocalMatrix * stitchingOrientation.localToWorldMatrix;
+            Vector3 euler = tr.rotation.eulerAngles;
+            Quaternion q = Quaternion.identity;
+            q *= Quaternion.AngleAxis(euler.z, Vector3.forward);
+            q *= Quaternion.AngleAxis(euler.x, Vector3.right);
+            q *= Quaternion.AngleAxis(-euler.y, Vector3.up);
+            orientMatrix = Matrix4x4.Rotate(q);
+        }
         
         _equirectMat.SetTexture("_FaceTexPX", Face(CubeFace.PX, 0));
         _equirectMat.SetTexture("_FaceTexNX", Face(CubeFace.NX, 0));
@@ -231,7 +236,7 @@ public class LilyRender360 : MonoBehaviour
         _equirectMat.SetTexture("_FaceTexNZ", Face(CubeFace.NZ, 0));
 
         _equirectMat.SetMatrix("_OrientMatrix", orientMatrix);
-
+        
         _equirectMat.SetFloat("_Beta", 1 / (1 + overlap));
 
         _equirectMat.SetFloat("_HorizontalFov", horizontalFov * Mathf.Deg2Rad);
@@ -314,7 +319,7 @@ public class LilyRender360 : MonoBehaviour
 
         _frame++;
 
-        if (_frame > MaxFrame || (enableEndFrame && endFrame >= 0 && _frame > endFrame))
+        if (_frame > MaxFrame)
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;

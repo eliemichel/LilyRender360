@@ -740,8 +740,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1488152084}
+  - component: {fileID: 1488152085}
   m_Layer: 0
-  m_Name: StichingOrientation
+  m_Name: StitchingOrientation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -754,13 +755,32 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1488152083}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0.27644992, y: -0.76200056, z: -0.27586338, w: 0.5165559}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1562765411}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -11.04, y: -70.32, z: 20.54}
+--- !u!95 &1488152085
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1488152083}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 0e8e18ac448cbdb42ac5801a06e9e026, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1562765408
 GameObject:
   m_ObjectHideFlags: 0
@@ -840,14 +860,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1562765408}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0.3834331, z: 0, w: 0.92356867}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1488152084}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 45.093002, z: 0}
 --- !u!114 &1562765412
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -864,22 +884,22 @@ MonoBehaviour:
   format: 0
   prefix: Recordings/
   nDigits: 4
-  overwriteFile: 0
+  overwriteFile: 1
   width: 1024
   enableHeight: 0
-  height: 512
+  height: 430
   startFrame: 0
-  enableEndFrame: 0
-  endFrame: -1
-  horizontalFov: 360
-  verticalFov: 180
+  enableEndFrame: 1
+  endFrame: 50
+  horizontalFov: 301
+  verticalFov: 126.6
   overlap: 0.5
-  stitchingOrientation: {fileID: 0}
-  showStitchLines: 0
+  stitchingOrientation: {fileID: 1488152084}
+  showStitchLines: 1
   enableCubeFaceSize: 0
-  cubeFaceSize: 512
+  cubeFaceSize: 612
   doubleRender: 0
-  smoothStitching: 0
+  smoothStitching: 1
 --- !u!114 &1562765413
 MonoBehaviour:
   m_ObjectHideFlags: 0
