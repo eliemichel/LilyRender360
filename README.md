@@ -10,7 +10,7 @@ Lily Render 360 is a tool for rendering a Unity scene into [equirectangular](htt
 Download
 --------
 
-A unity package is available for download on Gumroad: [LilyRender360-v1.0.0.unitypackage](https://gum.co/kMcSf). If you use this tool for a commercial purpose, please consider supporting it financially.
+A unity package is available for download on Gumroad: [LilyRender360-v1.1.0.unitypackage](https://gum.co/kMcSf). If you use this tool for a commercial purpose, please consider supporting it financially.
 
 Features
 --------
